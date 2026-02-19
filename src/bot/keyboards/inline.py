@@ -15,9 +15,7 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
 
 def get_cancel_keyboard(text: str = "Cancel") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text=text, callback_data="cancel")]
-        ]
+        inline_keyboard=[[InlineKeyboardButton(text=text, callback_data="cancel")]]
     )
 
 
@@ -34,10 +32,12 @@ def get_groups_keyboard(groups: list[tuple[int, str, bool]]) -> InlineKeyboardMa
     for group_id, title, bot_active in groups:
         status_emoji = "\u2705" if bot_active else "\u274c"
         button_text = f"{title} {status_emoji}"
-        keyboard.append([
-            InlineKeyboardButton(
-                text=button_text,
-                callback_data=f"group:{group_id}",
-            )
-        ])
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text=button_text,
+                    callback_data=f"group:{group_id}",
+                )
+            ]
+        )
     return InlineKeyboardMarkup(inline_keyboard=keyboard)

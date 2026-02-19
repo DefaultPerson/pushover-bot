@@ -1,7 +1,7 @@
-from .user import UserRepository
 from .group import GroupRepository
-from .subscription import SubscriptionRepository
 from .notification_log import NotificationLogRepository
+from .subscription import SubscriptionRepository
+from .user import UserRepository
 
 __all__ = [
     "UserRepository",

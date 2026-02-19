@@ -2,7 +2,6 @@
 
 from aiogram.types import BotCommand
 
-
 # Private chat commands per language
 PRIVATE_COMMANDS = {
     "en": [

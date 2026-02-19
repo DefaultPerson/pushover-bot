@@ -1,9 +1,8 @@
 """Middleware to archive all group messages to database."""
 
-import os
-from datetime import datetime
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 import structlog
 from aiogram import BaseMiddleware, Bot
@@ -108,7 +107,12 @@ class ArchiveMiddleware(BaseMiddleware):
         if media_file_id and bot:
             try:
                 media_file_path = await self._download_media(
-                    bot, message.chat.id, message.message_id, media_file_id, media_type, media_file_name
+                    bot,
+                    message.chat.id,
+                    message.message_id,
+                    media_file_id,
+                    media_type,
+                    media_file_name,
                 )
             except Exception as e:
                 log.warning("Failed to download media", error=str(e), file_id=media_file_id)
@@ -119,11 +123,14 @@ class ArchiveMiddleware(BaseMiddleware):
         forward_date = None
 
         if message.forward_origin:
-            if hasattr(message.forward_origin, 'sender_user') and message.forward_origin.sender_user:
+            if (
+                hasattr(message.forward_origin, "sender_user")
+                and message.forward_origin.sender_user
+            ):
                 forward_from_user_id = message.forward_origin.sender_user.id
-            if hasattr(message.forward_origin, 'chat') and message.forward_origin.chat:
+            if hasattr(message.forward_origin, "chat") and message.forward_origin.chat:
                 forward_from_chat_id = message.forward_origin.chat.id
-            if hasattr(message.forward_origin, 'date'):
+            if hasattr(message.forward_origin, "date"):
                 forward_date = message.forward_origin.date
 
         # Insert into database

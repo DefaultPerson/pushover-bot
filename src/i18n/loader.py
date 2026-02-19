@@ -1,3 +1,4 @@
+import contextlib
 from pathlib import Path
 
 import yaml
@@ -24,9 +25,7 @@ def get_text(key: str, lang: str = "en", **kwargs) -> str:
     text = locale.get(key, key)
 
     if kwargs:
-        try:
+        with contextlib.suppress(KeyError):
             text = text.format(**kwargs)
-        except KeyError:
-            pass
 
     return text

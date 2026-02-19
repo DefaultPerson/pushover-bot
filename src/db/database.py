@@ -55,8 +55,7 @@ class Database:
         """)
 
         applied = {
-            r["filename"]
-            for r in await self.fetch("SELECT filename FROM schema_migrations")
+            r["filename"] for r in await self.fetch("SELECT filename FROM schema_migrations")
         }
 
         for sql_file in sorted(MIGRATIONS_DIR.glob("*.sql")):

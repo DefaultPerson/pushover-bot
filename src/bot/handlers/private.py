@@ -1,6 +1,6 @@
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
@@ -87,8 +87,7 @@ async def cmd_list(message: Message, _: Callable) -> None:
 
     # Normalize groups: replace None titles with ID fallback
     normalized_groups = [
-        (group_id, title or f"ID: {group_id}", bot_active)
-        for group_id, title, bot_active in groups
+        (group_id, title or f"ID: {group_id}", bot_active) for group_id, title, bot_active in groups
     ]
 
     await message.answer(
@@ -110,7 +109,8 @@ async def process_language(callback: CallbackQuery, _: Callable) -> None:
 
     # Update command menu for this user
     from aiogram.types import BotCommandScopeChat
-    from src.bot.commands import PRIVATE_COMMANDS, ADMIN_COMMANDS
+
+    from src.bot.commands import ADMIN_COMMANDS, PRIVATE_COMMANDS
     from src.config import settings
 
     commands = PRIVATE_COMMANDS.get(lang, PRIVATE_COMMANDS["en"])

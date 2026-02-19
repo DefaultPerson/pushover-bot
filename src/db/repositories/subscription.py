@@ -1,5 +1,4 @@
 from src.db.database import db
-from src.db.models import Subscription
 
 
 class SubscriptionRepository:
@@ -107,9 +106,7 @@ class SubscriptionRepository:
         return count or 0
 
     @staticmethod
-    async def get_enabled_user_by_username(
-        username: str, group_id: int
-    ) -> tuple[int, str] | None:
+    async def get_enabled_user_by_username(username: str, group_id: int) -> tuple[int, str] | None:
         """Find user by username among enabled subscribers of a group with a Pushover key."""
         row = await db.fetchrow(
             """

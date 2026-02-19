@@ -7,16 +7,30 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram.types import BotCommandScopeAllGroupChats, BotCommandScopeAllPrivateChats, BotCommandScopeChat
+from aiogram.types import (
+    BotCommandScopeAllGroupChats,
+    BotCommandScopeAllPrivateChats,
+    BotCommandScopeChat,
+)
+from aiogram_broadcast import (
+    BroadcastMiddleware,
+    BroadcastScheduler,
+    BroadcastService,
+    RedisBroadcastStorage,
+)
+from aiogram_broadcast.ui import BroadcastUIHandlers, BroadcastUIMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from redis.asyncio import Redis
 
-from aiogram_broadcast import BroadcastMiddleware, BroadcastScheduler, BroadcastService, RedisBroadcastStorage
-from aiogram_broadcast.ui import BroadcastUIHandlers, BroadcastUIMiddleware
-
 from src.bot.commands import ADMIN_COMMANDS, GROUP_COMMANDS, PRIVATE_COMMANDS
 from src.bot.handlers import setup_routers
-from src.bot.middlewares import ArchiveMiddleware, FSMCancelMiddleware, I18nMiddleware, ThrottlingMiddleware, UserMiddleware
+from src.bot.middlewares import (
+    ArchiveMiddleware,
+    FSMCancelMiddleware,
+    I18nMiddleware,
+    ThrottlingMiddleware,
+    UserMiddleware,
+)
 from src.config import settings
 from src.db.database import db
 from src.i18n import load_locales
@@ -84,7 +98,9 @@ async def main() -> None:
 
     # Connect to Redis
     redis = Redis.from_url(settings.redis_url)
-    log.info("Redis connected", url=settings.redis_url.replace(settings.redis_password or "", "***"))
+    log.info(
+        "Redis connected", url=settings.redis_url.replace(settings.redis_password or "", "***")
+    )
 
     # Initialize FSM storage with Redis
     fsm_storage = RedisStorage(redis=redis)
@@ -126,7 +142,9 @@ async def main() -> None:
         )
     )
 
-    dp.message.outer_middleware.register(FSMCancelMiddleware())  # Cancel FSM states on commands first
+    dp.message.outer_middleware.register(
+        FSMCancelMiddleware()
+    )  # Cancel FSM states on commands first
     dp.message.outer_middleware.register(ArchiveMiddleware())  # Archive group messages (if enabled)
     dp.message.middleware(I18nMiddleware())
     dp.message.middleware(UserMiddleware())

@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -77,16 +77,26 @@ async def cmd_gm(message: Message, _: Callable) -> None:
     # 3. Numeric ID → send to user by ID
     if first_word.isdigit():
         return await _send_to_user(
-            message, group_id, sender_id, sender_name, _,
-            target_user_id=int(first_word), custom_text=remaining,
+            message,
+            group_id,
+            sender_id,
+            sender_name,
+            _,
+            target_user_id=int(first_word),
+            custom_text=remaining,
         )
 
     # 4. Try to find as username among group subscribers
     found = await SubscriptionRepository.get_enabled_user_by_username(first_word, group_id)
     if found:
         return await _send_to_user(
-            message, group_id, sender_id, sender_name, _,
-            target_user_id=found[0], custom_text=remaining,
+            message,
+            group_id,
+            sender_id,
+            sender_name,
+            _,
+            target_user_id=found[0],
+            custom_text=remaining,
         )
 
     # 5. Not found → entire rest is custom text for all
@@ -168,8 +178,13 @@ async def _resolve_and_send_to_user(
         return
 
     await _send_to_user(
-        msg, group_id, sender_id, sender_name, _,
-        target_user_id=found[0], custom_text=custom_text,
+        msg,
+        group_id,
+        sender_id,
+        sender_name,
+        _,
+        target_user_id=found[0],
+        custom_text=custom_text,
     )
 
 
@@ -215,6 +230,7 @@ async def process_group_language(callback: CallbackQuery, _: Callable) -> None:
 
     # Update command menu for this group
     from aiogram.types import BotCommandScopeChat
+
     from src.bot.commands import GROUP_COMMANDS
 
     commands = GROUP_COMMANDS.get(lang, GROUP_COMMANDS["en"])

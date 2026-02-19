@@ -12,8 +12,8 @@ from src.config import settings
 from src.services.broadcast import get_broadcast_service
 
 if TYPE_CHECKING:
-    from aiogram_broadcast.ui import BroadcastUIManager
     from aiogram_broadcast.storage import BaseBroadcastStorage
+    from aiogram_broadcast.ui import BroadcastUIManager
 
 router = Router()
 router.message.filter(IsPrivate())
@@ -29,8 +29,8 @@ def is_admin(user_id: int) -> bool:
 @router.message(Command("broadcast"))
 async def cmd_broadcast(
     message: Message,
-    broadcast_ui: "BroadcastUIManager",
-    broadcast_storage: "BaseBroadcastStorage",
+    broadcast_ui: BroadcastUIManager,
+    broadcast_storage: BaseBroadcastStorage,
 ) -> None:
     """Start interactive broadcast UI (admin only)."""
     if not is_admin(message.from_user.id):
