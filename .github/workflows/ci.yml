@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.14-slim
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: pip install --no-cache-dir uv
       - run: uv pip install --system --no-cache ruff
       - run: ruff check src/
