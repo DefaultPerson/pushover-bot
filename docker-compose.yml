@@ -6,7 +6,7 @@ services:
     build:
       context: .
       additional_contexts:
-        - libs=../../libs
+        - libs=./libs
     container_name: hm-pushover-bot
     restart: unless-stopped
     network_mode: host

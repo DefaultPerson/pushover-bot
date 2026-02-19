@@ -30,7 +30,7 @@ services:
     build:
       context: .
       additional_contexts:
-        - libs=../../libs
+        - libs=./libs
     restart: unless-stopped
     env_file: .env
     environment:

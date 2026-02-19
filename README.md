@@ -1,211 +1,88 @@
+<h1 align="center">Pushover Bot</h1>
+
 <p align="center">
-  <img src="assets/header.png" alt="Pushover Bot" />
+  <img src="assets/header.png" alt="Pushover Bot" width="600" />
 </p>
 
 <p align="center">
-  <a href="https://t.me/PushoverABot">@PushoverABot</a>
+  <a href="https://t.me/PushoverABot"><img src="https://img.shields.io/badge/Telegram-@PushoverABot-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Telegram Bot" /></a>
+  <img src="https://img.shields.io/badge/python-3.14-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/aiogram-3.x-009688?style=flat-square" alt="aiogram" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
 </p>
 
-> **Warning:** Бот находится в процессе разработки. История сообщений и настройки могут быть сброшены.
+Telegram bot for emergency notifications via [Pushover](https://pushover.net/). Wakes you up with a siren even when your phone is on silent. Add the bot to a group — any member can send an emergency alert to everyone or a specific person.
 
-## Описание
+> **Note:** Group Privacy Mode must be **disabled** in BotFather. Otherwise the bot won't receive messages in groups (except commands and replies). If it was enabled, remove and re-add the bot to the group.
 
-Telegram-бот для доставки emergency-уведомлений через [Pushover](https://pushover.net/). Разбудит вас сиреной, даже если звук на телефоне выключен. Добавьте бота в группу — и любой участник сможет отправить экстренное уведомление всем или конкретному человеку.
+## Features
 
-## Privacy Mode
+- **Emergency alerts** — Pushover Priority 2, bypasses quiet hours, repeats every 30s until acknowledged
+- **Group chats** — `/gm` sends a siren to all subscribed members
+- **Targeted notifications** — `/gm @username`, `/gm user_id`, or `/gm username`
+- **Custom text** — `/gm hello` or `/gm @username wake up`
+- **Message archiving** — saves all group messages to DB with media files
+- **HTML export** — searchable archive with media thumbnails
+- **Broadcast** — mass messaging for admins
+- **Rate limiting** and **multi-language** support (EN, RU, UK)
 
-> **Важно:** В BotFather у бота должен быть **выключен** Group Privacy Mode. Иначе бот не получает сообщения в группах, кроме команд и reply. Если privacy mode был включен, нужно удалить бота из группы и добавить заново.
-
-## Возможности
-
-- **Emergency уведомления** — Priority 2, обходят тихие часы, повторяются каждые 30 секунд до подтверждения
-- **Групповые чаты** — `/gm` отправляет сирену всем участникам с включенными уведомлениями
-- **Таргетированные уведомления** — `/gm @username`, `/gm user_id` или `/gm username`
-- **Кастомный текст** — `/gm привет` или `/gm @username wake up`
-- **Архивирование сообщений** — сохранение всех сообщений из групп в БД с медиафайлами
-- **HTML экспорт** — красивый экспорт архива с поиском и фильтрацией
-- **Broadcast** — массовая рассылка для администраторов
-- **Rate limiting** — защита от спама
-- **Мультиязычность** — русский, английский, украинский
-
-## Быстрый старт
-
-### 1. Получение токенов
-
-**Telegram Bot Token:**
-1. Напишите [@BotFather](https://t.me/BotFather)
-2. Создайте нового бота: `/newbot`
-3. Скопируйте токен
-
-**Pushover App Token:**
-1. Зарегистрируйтесь на [pushover.net](https://pushover.net)
-2. [Создайте приложение](https://pushover.net/apps/build)
-3. Скопируйте **API Token/Key**
-
-### 2. Запуск с Docker Compose (полный стек)
+## Quick Start
 
 ```bash
 git clone https://github.com/DefaultPerson/pushover-bot.git
 cd pushover-bot
-
 cp .env.example .env
-nano .env  # заполните BOT_TOKEN, PUSHOVER_APP_TOKEN, DB_PASSWORD
-
+nano .env  # fill in BOT_TOKEN, PUSHOVER_APP_TOKEN, DB_PASSWORD
 docker compose -f docker-compose.full.yml up -d
 ```
 
-`docker-compose.full.yml` поднимает PostgreSQL, Redis и бота — всё в одном.
+`docker-compose.full.yml` runs PostgreSQL, Redis, and the bot together.
 
-## Команды бота
-
-### В личных сообщениях
-
-| Команда | Описание |
-|---------|----------|
-| `/start` | Приветствие и инструкция |
-| `/key` | Настроить Pushover User Key |
-| `/list` | Список групп с уведомлениями |
-| `/test_alarm` | Тестовая сирена |
-| `/language` | Сменить язык |
-| `/help` | Справка |
-
-### В групповых чатах
-
-| Команда | Описание |
-|---------|----------|
-| `/gm` | Отправить уведомление всем |
-| `/gm текст` | Отправить кастомный текст всем |
-| `/gm @username` | Отправить конкретному по username |
-| `/gm @username текст` | С кастомным текстом |
-| `/gm user_id` | По ID |
-| `/gm user_id текст` | По ID с кастомным текстом |
-| `/enable` | Включить уведомления |
-| `/disable` | Выключить уведомления |
-| `/test_alarm` | Тестовая сирена себе |
-| `/only_admin` | Только админы могут /gm |
-| `/language` | Сменить язык группы |
-
-### Администрирование
-
-| Команда | Описание |
-|---------|----------|
-| `/broadcast` | Массовая рассылка (только для ADMIN_IDS) |
-| `/stats` | Статистика бота |
-
-## Развертывание на VPS
-
-Скрипт для быстрого деплоя на чистый VPS (Ubuntu/Debian):
+For a fresh VPS, deploy with a single command:
 
 ```bash
-bash scripts/deploy.sh
+curl -fsSL https://raw.githubusercontent.com/DefaultPerson/pushover-bot/main/scripts/deploy.sh | bash
 ```
 
-Скрипт установит Docker (если нет), склонирует репо, создаст `.env` и запустит все сервисы.
+## Commands
 
-## Docker Compose
+### Private chat
 
-| Файл | Описание |
-|------|----------|
-| `docker-compose.yml` | Только бот. Подключается к внешним PostgreSQL и Redis |
-| `docker-compose.full.yml` | Полный стек: PostgreSQL + Redis + бот |
+| Command | Description |
+|---------|-------------|
+| `/key` | Set up Pushover User Key |
+| `/list` | Groups with active notifications |
+| `/test_alarm` | Send a test siren to yourself |
+| `/language` | Change language |
 
-## Конфигурация
+### Group chat
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `BOT_TOKEN` | Telegram Bot Token | (обязательно) |
-| `PUSHOVER_APP_TOKEN` | Pushover Application Token | (обязательно) |
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_NAME` | Database name | `pushover` |
-| `DB_USER` | Database user | `bot` |
-| `DB_PASSWORD` | Database password | (обязательно) |
-| `REDIS_HOST` | Redis host | `localhost` |
-| `REDIS_PORT` | Redis port | `6379` |
-| `REDIS_DB` | Redis database | `0` |
-| `ADMIN_IDS` | Telegram IDs админов (через запятую) | |
-| `LOG_LEVEL` | Уровень логирования | `INFO` |
-| `GM_RATE_LIMIT` | Макс. вызовов /gm за окно | `3` |
-| `GM_RATE_WINDOW` | Окно rate limit в секундах | `300` |
-| `ARCHIVE_ENABLED` | Архивировать сообщения | `false` |
-| `ARCHIVE_MEDIA_PATH` | Путь для медиа | `archive/media` |
+| Command | Description |
+|---------|-------------|
+| `/gm` | Alert everyone |
+| `/gm text` | Alert everyone with custom text |
+| `/gm @username` | Alert a specific member |
+| `/gm @username text` | Specific member with custom text |
+| `/gm user_id` | Alert by user ID |
+| `/enable` / `/disable` | Toggle notifications |
+| `/only_admin` | Restrict `/gm` to admins only |
 
-## Архивирование сообщений
+## Configuration
 
-Бот может сохранять все сообщения из групп в базу данных.
+See [`.env.example`](.env.example) for all available environment variables.
 
-### Включение
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `BOT_TOKEN` | Telegram Bot Token | required |
+| `PUSHOVER_APP_TOKEN` | Pushover App Token | required |
+| `DB_PASSWORD` | PostgreSQL password | required |
+| `ADMIN_IDS` | Admin Telegram IDs (comma-separated) | |
+| `ARCHIVE_ENABLED` | Archive group messages | `false` |
 
-```env
-ARCHIVE_ENABLED=true
-ARCHIVE_MEDIA_PATH=archive/media
-```
-
-### Экспорт архива
+## Development
 
 ```bash
-./scripts/export.sh
-
-# Конкретная группа
-./scripts/export.sh . --group -1001234567890
-```
-
-Результат: `archive.html` + `archive_media/`
-
-## Разработка
-
-### Установка зависимостей
-
-```bash
-# aiogram-broadcast из libs/
-uv pip install -e ../../libs/aiogram-broadcast
-
-# Основные зависимости
+uv pip install -e libs/aiogram-broadcast
 uv pip install -e .
-```
-
-### Запуск локально
-
-```bash
 make run
-```
-
-### Линтинг
-
-```bash
-make lint       # проверка
-make lint-fix   # автоисправление
-```
-
-## Структура проекта
-
-```
-pushover-bot/
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose.full.yml
-├── src/
-│   ├── main.py
-│   ├── config.py
-│   ├── bot/
-│   │   ├── handlers/
-│   │   ├── middlewares/
-│   │   ├── keyboards/
-│   │   └── filters/
-│   ├── services/
-│   │   ├── pushover.py
-│   │   ├── notification.py
-│   │   └── broadcast.py
-│   ├── db/
-│   │   ├── database.py
-│   │   ├── models.py
-│   │   └── repositories/
-│   └── i18n/
-│       └── locales/
-├── scripts/
-│   ├── deploy.sh
-│   ├── export.sh
-│   └── export_archive.py
-├── migrations/
-└── assets/
 ```
