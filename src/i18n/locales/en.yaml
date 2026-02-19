@@ -1,0 +1,133 @@
+# English locale
+
+# Common
+start: |
+  Pushover bot uses the <a href="https://pushover.net/">Pushover service</a> to deliver notifications from Telegram to your device.
+
+  You can add the bot to a group, and every member of that group will be able to send notifications to your smartphone.
+  For example, to wake you up if the BTC price reaches new highs.
+
+  <b>Available commands in group chat:</b>
+  /gm — Send notification to all group members
+  /gm text — Send custom text to all
+  /gm @username — Send to a specific member by username
+  /gm @username text — With custom text
+  /gm user_id — Send to a specific member by ID
+  /gm user_id text — By ID with custom text
+  /enable — Start receiving notifications from this group.
+  /disable — Stop receiving notifications from this group.
+  /test_alarm — Send a test notification to yourself.
+  /help — Show this informative message.
+  /only_admin — Allow or disallow non-admin chat members to use the /gm command.
+
+  <b>Available commands in private chat with the bot:</b>
+  /key — Configure Pushover API key.
+  /list — List of groups with enabled notifications.
+  /test_alarm — Send a test notification to yourself.
+  /language — Change language.
+  /help — Show this informative message.
+
+  To start receiving notifications in a group, each member who wants to receive notifications must use the /enable command inside the desired group.
+
+  Before that, you need to configure your Pushover API key using the /key command in private messages with the bot.
+
+help_private: |
+  <b>Available commands in private chat:</b>
+
+  /key — Configure Pushover API key
+  /list — List of groups with enabled notifications
+  /test_alarm — Send a test notification to yourself
+  /language — Change language
+  /help — Show this message
+
+help_group: |
+  <b>Available commands in group chat:</b>
+
+  /gm — Send notification to all
+  /gm text — Send custom text to all
+  /gm @username — Send to a specific member by username
+  /gm @username text — With custom text
+  /gm user_id — By ID
+  /gm user_id text — By ID with custom text
+  /enable — Start receiving notifications from this group
+  /disable — Stop receiving notifications from this group
+  /test_alarm — Send a test notification to yourself
+  /only_admin — Allow/disallow non-admins to use /gm
+  /help — Show this message
+
+# Key setup
+key_prompt: |
+  1. Download the Pushover app for <a href="https://apps.apple.com/us/app/pushover-notifications/id506088175">iOS</a> or <a href="https://play.google.com/store/apps/details?id=net.superblock.pushover">Android</a>.
+  2. Register an account.
+  3. <b>For Android:</b> Allow sending regular and critical notifications, and set the volume in the app settings (see the photo above).
+  <b>For iPhone:</b> Go to Pushover app → Settings → Notification Settings and enable:
+  • Critical Alerts for high-priority
+  • Critical Alerts for emergency-priority
+  4. Copy your key (PUSHOVER USER KEY) and send it to me.
+
+  Example key: <code>uQiRzpo4DXghDmr9QzzfQu27cmVRsG</code>
+
+  /cancel — cancel key setup.
+key_invalid: "Invalid key. Pushover User Key must be 30 characters."
+key_saved: |
+  New API key successfully configured.
+
+  Now go to your desired groups with the bot and type /enable in each one.
+key_updated_existing: |
+  Key updated. Your subscriptions in {count} groups are still active.
+key_validation_failed: "Could not validate key. Check and try again."
+key_cancelled: "Key setup cancelled."
+
+# Enable/Disable
+enable_success: "You will now receive notifications from this group."
+enable_no_key: |
+  You don't have a Pushover API key configured.
+
+  1. Go to private messages with the bot.
+  2. Use the /key command.
+disable_success: "Notifications disabled."
+only_group: "This command must be used inside a group chat."
+
+# GM
+gm_sending: "Sending..."
+gm_sent: "Sent successfully!"
+gm_sent_stats: "Sent: {success}, errors: {fail}"
+gm_no_users: "No users with enabled notifications in this group."
+gm_user_not_found: "User not found or hasn't configured notifications."
+gm_user_sent: "Sent successfully!"
+gm_user_failed: "Failed to send: {error}"
+gm_admin_only: "Only administrators can use /gm in this group."
+
+# Test alarm
+test_sending: "Sending test notification..."
+test_success: "Sent successfully!"
+test_failed: "Error: {error}"
+test_no_key: |
+  You don't have a Pushover API key configured.
+
+  1. Go to private messages with the bot.
+  2. Use the /key command.
+
+# Only admin
+only_admin_enabled: "Now only administrators can use /gm."
+only_admin_disabled: "Now all members can use /gm."
+only_admin_permission: "Only administrators can change this setting."
+
+# Language
+language_select: "Виберіть мову / Выберите язык / Select language:"
+language_changed: "Language changed to English."
+group_language_changed: "Group language changed to English."
+
+# List
+list_empty: "You have no groups with enabled notifications."
+list_header: "Your groups with enabled notifications:"
+
+# Rate limits
+rate_limit_gm: "Too many /gm calls. Please wait."
+rate_limit_test: "Wait a minute before the next test."
+
+# Errors
+error_generic: "An error occurred. Try again later."
+
+# Buttons
+btn_cancel: "Cancel"

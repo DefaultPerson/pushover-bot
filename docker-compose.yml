@@ -1,0 +1,16 @@
+# Pushover Bot
+# Requires shared infrastructure: hm-postgres, hm-redis
+
+services:
+  pushover-bot:
+    build:
+      context: .
+      additional_contexts:
+        - libs=../../libs
+    container_name: hm-pushover-bot
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    volumes:
+      - ./archive/media:/app/archive/media:z

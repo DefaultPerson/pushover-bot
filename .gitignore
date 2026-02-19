@@ -1,0 +1,53 @@
+# Logs
+logs/
+*.log
+*.log.*
+
+# Envs & secrets
+.env
+.env.local
+.env.remote
+*.pem
+*.key
+
+# Archive exports
+archive/
+archive_media/
+archive.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# IDE & tools
+.mcp.json
+!.claude/settings.local.json
+.claude/hooks/cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Docker volumes data
+postgres_data/
+redis_data/
+
+# Auto Claude data directory
+.auto-claude/
