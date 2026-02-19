@@ -86,3 +86,7 @@ uv pip install -e libs/aiogram-broadcast
 uv pip install -e .
 make run
 ```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
