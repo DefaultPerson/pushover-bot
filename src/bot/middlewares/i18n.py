@@ -3,6 +3,7 @@ from typing import Any, Awaitable, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, Message, TelegramObject, User
 
+from src.config import settings
 from src.db.repositories import GroupRepository, UserRepository
 from src.i18n import get_text
 
@@ -15,7 +16,7 @@ class I18nMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> Any:
         user: User | None = data.get("event_from_user")
-        language = "en"
+        language = settings.default_language
 
         # Determine chat type from event
         chat = None

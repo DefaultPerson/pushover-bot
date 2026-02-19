@@ -1,3 +1,4 @@
+from src.config import settings
 from src.db.database import db
 from src.db.models import User
 
@@ -11,7 +12,10 @@ class UserRepository:
         return None
 
     @staticmethod
-    async def upsert(user_id: int, username: str | None = None, language: str = "ru") -> User:
+    async def upsert(
+        user_id: int, username: str | None = None, language: str | None = None
+    ) -> User:
+        language = language or settings.default_language
         row = await db.fetchrow(
             """
             INSERT INTO users (id, username, language) VALUES ($1, $2, $3)
@@ -59,4 +63,4 @@ class UserRepository:
     @staticmethod
     async def get_language(user_id: int) -> str:
         lang = await db.fetchval("SELECT language FROM users WHERE id = $1", user_id)
-        return lang or "ru"
+        return lang or settings.default_language

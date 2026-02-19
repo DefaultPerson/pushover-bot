@@ -77,8 +77,10 @@ async def main() -> None:
     # Load i18n
     load_locales()
 
-    # Connect to database
+    # Connect to database (create if missing, apply migrations)
+    await db.ensure_database()
     await db.connect()
+    await db.run_migrations()
 
     # Connect to Redis
     redis = Redis.from_url(settings.redis_url)

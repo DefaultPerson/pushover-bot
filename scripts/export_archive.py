@@ -102,6 +102,8 @@ def render_media(msg: dict, media_folder: str) -> str:
     elif media_type in ("audio", "voice"):
         return f'<div class="media"><audio src="{rel_path}" controls></audio></div>'
     elif media_type == "sticker":
+        if rel_path.endswith(".webm"):
+            return f'<div class="media sticker"><video src="{rel_path}" autoplay loop muted playsinline></video></div>'
         return f'<div class="media sticker"><img src="{rel_path}" alt="Sticker" loading="lazy"></div>'
     else:
         return f'<div class="media"><a href="{rel_path}" target="_blank">📎 {escape_html(file_name)}</a></div>'
@@ -377,6 +379,7 @@ def generate_html(groups: list[dict], messages: list[dict], media_base_path: str
         .media video { max-width: 400px; border-radius: 8px; }
         .media audio { width: 100%; max-width: 300px; }
         .media.sticker img { max-width: 150px; }
+        .media.sticker video { max-width: 150px; border-radius: 8px; }
         .media a { color: var(--accent-color); }
         .media-placeholder { color: var(--text-secondary); font-style: italic; }
 

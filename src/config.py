@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # Admin IDs (comma-separated list of Telegram user IDs who can broadcast)
     admin_ids: str = ""
 
+    # Language
+    default_language: str = "en"
+
     # Logging
     log_level: str = "INFO"
 
