@@ -167,7 +167,7 @@ async def main() -> None:
     apscheduler.start()
 
     try:
-        await dp.start_polling(bot)
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     finally:
         apscheduler.shutdown()
         await db.disconnect()
