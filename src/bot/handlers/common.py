@@ -167,7 +167,8 @@ async def _block_target(message: Message, _: Callable) -> tuple[int, str] | None
     args = message.text.split(maxsplit=1)
     arg = args[1].strip() if len(args) > 1 else ""
     if arg.isdigit():
-        return int(arg), arg
+        user = await UserRepository.get(int(arg))
+        return int(arg), user.display_name if user else arg
     if arg:
         user = await UserRepository.get_by_username(arg.removeprefix("@"))
         if user:
