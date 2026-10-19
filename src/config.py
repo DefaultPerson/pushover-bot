@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Language
     default_language: str = "en"
 
+    # Timezone for /quiet when the user gives none (IANA name)
+    default_timezone: str = "UTC"
+
     # Logging
     log_level: str = "INFO"
 

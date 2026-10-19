@@ -442,6 +442,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "redis" },
     { name = "structlog" },
+    { name = "tzdata" },
 ]
 
 [package.optional-dependencies]
@@ -465,6 +466,7 @@ requires-dist = [
     { name = "redis", specifier = ">=5.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
     { name = "structlog", specifier = ">=24.4.0" },
+    { name = "tzdata", specifier = ">=2025.2" },
 ]
 provides-extras = ["dev"]
 

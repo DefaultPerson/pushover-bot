@@ -1,4 +1,5 @@
 from src.db.database import db
+from src.db.models import User
 
 
 class SubscriptionRepository:
@@ -63,18 +64,53 @@ class SubscriptionRepository:
         return None
 
     @staticmethod
-    async def get_enabled_users_with_keys(group_id: int) -> list[tuple[int, str]]:
-        """Get all (user_id, pushover_key) pairs for enabled users in group."""
+    async def get_recipients(
+        group_id: int, sender_id: int, user_id: int | None = None
+    ) -> list[User]:
+        """Enabled users with a key in the group, minus those who blocked the sender.
+
+        With user_id, returns only that user (or nothing).
+        """
         rows = await db.fetch(
             """
-            SELECT u.id, u.pushover_key
+            SELECT u.*
             FROM subscriptions s
             JOIN users u ON s.user_id = u.id
             WHERE s.group_id = $1 AND s.enabled = TRUE AND u.pushover_key IS NOT NULL
+              AND NOT EXISTS (
+                  SELECT 1 FROM user_blocks b WHERE b.blocker_id = u.id AND b.blocked_id = $2
+              )
+              AND ($3::BIGINT IS NULL OR u.id = $3)
             """,
             group_id,
+            sender_id,
+            user_id,
         )
-        return [(row["id"], row["pushover_key"]) for row in rows]
+        return [User(**dict(row)) for row in rows]
+
+    @staticmethod
+    async def get_inline_candidates(sender_id: int) -> list[User]:
+        """People the sender can alert personally, from all groups shared with the sender."""
+        rows = await db.fetch(
+            """
+            SELECT DISTINCT u.*
+            FROM subscriptions s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.enabled = TRUE AND u.pushover_key IS NOT NULL
+              AND u.personal_gms = TRUE AND u.id <> $1
+              AND s.group_id IN (
+                  SELECT group_id FROM subscriptions WHERE user_id = $1
+                  UNION
+                  SELECT group_id FROM gm_history WHERE user_id = $1
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM user_blocks b WHERE b.blocker_id = u.id AND b.blocked_id = $1
+              )
+            ORDER BY u.full_name NULLS LAST, u.username NULLS LAST
+            """,
+            sender_id,
+        )
+        return [User(**dict(row)) for row in rows]
 
     @staticmethod
     async def get_user_groups(user_id: int) -> list[tuple[int, str | None, bool]]:

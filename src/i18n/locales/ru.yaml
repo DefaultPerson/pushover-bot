@@ -131,3 +131,11 @@ error_generic: "Произошла ошибка. Попробуйте позже
 
 # Buttons
 btn_cancel: "Отмена"
+
+# Push texts (in the recipient's language)
+push_title: "ТРЕВОГА"
+push_default: "Подъём! Тебя зовёт {sender}!"
+push_test_title: "ТЕСТОВАЯ ТРЕВОГА"
+push_test: "Тестовая тревога! Если вы это видите, Pushover работает."
+gm_quiet_list: "🔕 Сейчас тихо, пришло без звука: {names}"
+pgm_personal_off: "Этот пользователь не принимает личные алерты."

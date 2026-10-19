@@ -20,7 +20,9 @@ class UserMiddleware(BaseMiddleware):
 
         if user:
             # Upsert user (always update username from Telegram)
-            db_user = await UserRepository.upsert(user.id, username=user.username)
+            db_user = await UserRepository.upsert(
+                user.id, username=user.username, full_name=user.full_name
+            )
             data["db_user"] = db_user
 
         # Upsert group if message is from group

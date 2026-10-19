@@ -131,3 +131,11 @@ error_generic: "An error occurred. Try again later."
 
 # Buttons
 btn_cancel: "Cancel"
+
+# Push texts (in the recipient's language)
+push_title: "ALARM"
+push_default: "Wake up! {sender} is calling!"
+push_test_title: "TEST ALARM"
+push_test: "Test alarm! If you see this, Pushover is working."
+gm_quiet_list: "🔕 Quiet hours, delivered silently: {names}"
+pgm_personal_off: "This user doesn't accept personal alerts."

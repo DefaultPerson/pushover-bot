@@ -113,7 +113,7 @@ async def _send_to_all(
     custom_text: str | None = None,
 ) -> None:
     """Send GM to all enabled users in group."""
-    users = await SubscriptionRepository.get_enabled_users_with_keys(group_id)
+    users = await SubscriptionRepository.get_recipients(group_id, sender_id)
 
     if not users:
         await msg.reply(_("gm_no_users"))
@@ -121,17 +121,17 @@ async def _send_to_all(
 
     await msg.reply(_("gm_sending"))
 
-    success, fail = await notification_service.send_gm_to_all(
+    result = await notification_service.send_gm_to_all(
         group_id=group_id,
         sender_id=sender_id,
         sender_name=sender_name,
         message=custom_text,
     )
 
-    if fail == 0:
+    if result.fail == 0:
         await msg.reply(_("gm_sent"))
     else:
-        await msg.reply(_("gm_sent_stats", success=success, fail=fail))
+        await msg.reply(_("gm_sent_stats", success=result.success, fail=result.fail))
 
 
 async def _send_to_user(
@@ -147,7 +147,7 @@ async def _send_to_user(
     """Send GM to a specific user by ID."""
     await msg.reply(_("gm_sending"))
 
-    ok, error = await notification_service.send_gm_to_user(
+    result = await notification_service.send_gm_to_user(
         group_id=group_id,
         sender_id=sender_id,
         target_user_id=target_user_id,
@@ -155,10 +155,12 @@ async def _send_to_user(
         message=custom_text,
     )
 
-    if ok:
+    if result.refusal:
+        await msg.reply(_(result.refusal))
+    elif result.fail == 0:
         await msg.reply(_("gm_user_sent"))
     else:
-        await msg.reply(_("gm_user_failed", error=error))
+        await msg.reply(_("gm_user_failed", error=result.error))
 
 
 async def _resolve_and_send_to_user(

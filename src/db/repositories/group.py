@@ -45,6 +45,24 @@ class GroupRepository:
         return val or False
 
     @staticmethod
+    async def toggle_confirm_gm(group_id: int) -> bool:
+        """Toggle confirm_gm flag. Returns new value."""
+        new_value = await db.fetchval(
+            """
+            UPDATE groups SET confirm_gm = NOT confirm_gm, updated_at = NOW()
+            WHERE id = $1
+            RETURNING confirm_gm
+            """,
+            group_id,
+        )
+        return new_value or False
+
+    @staticmethod
+    async def is_confirm_gm(group_id: int) -> bool:
+        val = await db.fetchval("SELECT confirm_gm FROM groups WHERE id = $1", group_id)
+        return val or False
+
+    @staticmethod
     async def set_language(group_id: int, language: str) -> None:
         """Set the language for a group."""
         await db.execute(

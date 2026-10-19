@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, time
 
 
 @dataclass
@@ -10,6 +10,17 @@ class User:
     language: str = "en"
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    full_name: str | None = None
+    personal_gms: bool = True
+    quiet_start: time | None = None
+    quiet_end: time | None = None
+    quiet_tz: str | None = None
+    quiet_from: datetime | None = None
+    quiet_to: datetime | None = None
+
+    @property
+    def display_name(self) -> str:
+        return self.full_name or (f"@{self.username}" if self.username else str(self.id))
 
 
 @dataclass
@@ -21,6 +32,7 @@ class Group:
     bot_active: bool = True
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    confirm_gm: bool = False
 
 
 @dataclass
