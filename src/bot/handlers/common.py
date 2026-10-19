@@ -45,6 +45,6 @@ async def cmd_test_alarm(message: Message, db_user: User, _: Callable) -> None:
         await message.reply(_("test_failed", error=error))
 
 
-@router.message(Command("gm"), IsPrivate())
+@router.message(Command("gm", "pgm"), IsPrivate())
 async def cmd_gm_private(message: Message, _: Callable) -> None:
     await message.answer(_("only_group"))

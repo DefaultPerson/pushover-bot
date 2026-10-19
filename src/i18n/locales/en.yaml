@@ -139,3 +139,10 @@ push_test_title: "TEST ALARM"
 push_test: "Test alarm! If you see this, Pushover is working."
 gm_quiet_list: "🔕 Quiet hours, delivered silently: {names}"
 pgm_personal_off: "This user doesn't accept personal alerts."
+
+# Personal alerts and cancelling repeats
+pgm_usage: "Who should I wake? Reply /pgm to their message or write /pgm @username [text]."
+btn_cancel_repeats: "❌ Cancel repeats"
+cancel_not_yours: "Only the sender can cancel repeats."
+cancel_failed: "Couldn't cancel repeats, try again."
+cancel_done: "❌ Repeats cancelled."

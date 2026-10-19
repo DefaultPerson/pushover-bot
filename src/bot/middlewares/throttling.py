@@ -9,7 +9,7 @@ from src.db.repositories import NotificationLogRepository
 
 
 class ThrottlingMiddleware(BaseMiddleware):
-    """Rate limiting for /gm and /test_alarm commands."""
+    """Rate limiting for /gm, /pgm and /test_alarm commands."""
 
     async def __call__(
         self,
@@ -17,13 +17,14 @@ class ThrottlingMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        if not isinstance(event, Message) or not event.text:
+        # Forwarded commands are ignored by the handlers, so they cost nothing
+        if not isinstance(event, Message) or not event.text or event.forward_origin:
             return await handler(event, data)
 
         text = event.text.lower()
 
-        # Check /gm rate limit in groups
-        if text.startswith("/gm") and event.chat.type in ("group", "supergroup"):
+        # Check /gm and /pgm rate limit in groups
+        if text.startswith(("/gm", "/pgm")) and event.chat.type in ("group", "supergroup"):
             allowed = await NotificationLogRepository.check_gm_rate_limit(
                 group_id=event.chat.id,
                 window_seconds=settings.gm_rate_window,

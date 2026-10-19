@@ -1,14 +1,17 @@
+import html
 from collections.abc import Callable
 
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
+from aiogram.types import User as TgUser
 
 from src.bot.filters import IsGroup
-from src.bot.keyboards import get_language_keyboard
+from src.bot.keyboards import get_cancel_repeats_keyboard, get_language_keyboard
 from src.db.models import User
 from src.db.repositories import GroupRepository, SubscriptionRepository
-from src.services.notification import notification_service
+from src.services.notification import GmResult, notification_service
+from src.services.pushover import pushover_client
 
 router = Router()
 router.message.filter(IsGroup())
@@ -39,155 +42,155 @@ async def cmd_disable(message: Message, _: Callable) -> None:
     await message.reply(_("disable_success"))
 
 
-@router.message(Command("gm"))
-async def cmd_gm(message: Message, _: Callable) -> None:
-    # Check only_admin restriction
-    only_admin = await GroupRepository.is_only_admin(message.chat.id)
-    if only_admin and not await is_admin(message):
+async def _gm_allowed(message: Message, _: Callable) -> bool:
+    """Apply the group's only_admin restriction."""
+    if await GroupRepository.is_only_admin(message.chat.id) and not await is_admin(message):
         await message.reply(_("gm_admin_only"))
-        return
+        return False
+    return True
 
-    group_id = message.chat.id
-    sender_id = message.from_user.id
-    sender_name = message.from_user.full_name
+
+def _reply_target(message: Message) -> TgUser | None:
+    """Author of the replied message, ignoring bots and the forum topic root."""
+    reply = message.reply_to_message
+    if not reply or not reply.from_user or reply.from_user.is_bot or reply.forum_topic_created:
+        return None
+    return reply.from_user
+
+
+async def _resolve_target(rest: str, group_id: int) -> tuple[int | None, str | None]:
+    """Parse '<@username|user_id|username> [text]'.
+
+    Returns (user_id, text); user_id is None if the first word names nobody here.
+    """
+    parts = rest.split(maxsplit=1)
+    text = parts[1] if len(parts) > 1 else None
+    if parts[0].isdigit():
+        return int(parts[0]), text
+    found = await SubscriptionRepository.get_enabled_user_by_username(
+        parts[0].removeprefix("@"), group_id
+    )
+    return (found[0] if found else None), text
+
+
+# Forwarded commands come from someone else's chat history, never act on them
+@router.message(Command("gm"), F.forward_origin.is_(None))
+async def cmd_gm(message: Message, _: Callable) -> None:
+    if not await _gm_allowed(message, _):
+        return
 
     # Parse arguments: /gm [target] [custom_text]
     args = message.text.split(maxsplit=1)
-
     if len(args) <= 1:
-        # /gm → send to all with default text
-        return await _send_to_all(message, group_id, sender_id, sender_name, _)
+        return await _gm_all(message, _)
 
     rest = args[1].strip()
-
-    # 1. Starts with @ → username target
+    target_id, text = await _resolve_target(rest, message.chat.id)
+    if target_id is not None:
+        return await _gm_user(message, _, target_id, text)
     if rest.startswith("@"):
-        parts = rest[1:].split(maxsplit=1)
-        username = parts[0]
-        custom_text = parts[1] if len(parts) > 1 else None
-        return await _resolve_and_send_to_user(
-            message, group_id, sender_id, sender_name, _, username=username, custom_text=custom_text
-        )
+        await message.reply(_("gm_user_not_found"))
+        return
 
-    # 2. Parse first word
-    parts = rest.split(maxsplit=1)
-    first_word = parts[0]
-    remaining = parts[1] if len(parts) > 1 else None
-
-    # 3. Numeric ID → send to user by ID
-    if first_word.isdigit():
-        return await _send_to_user(
-            message,
-            group_id,
-            sender_id,
-            sender_name,
-            _,
-            target_user_id=int(first_word),
-            custom_text=remaining,
-        )
-
-    # 4. Try to find as username among group subscribers
-    found = await SubscriptionRepository.get_enabled_user_by_username(first_word, group_id)
-    if found:
-        return await _send_to_user(
-            message,
-            group_id,
-            sender_id,
-            sender_name,
-            _,
-            target_user_id=found[0],
-            custom_text=remaining,
-        )
-
-    # 5. Not found → entire rest is custom text for all
-    return await _send_to_all(message, group_id, sender_id, sender_name, _, custom_text=rest)
+    # The first word names nobody → the entire rest is custom text for all
+    return await _gm_all(message, _, rest)
 
 
-async def _send_to_all(
-    msg: Message,
-    group_id: int,
-    sender_id: int,
-    sender_name: str,
-    _: Callable,
-    *,
-    custom_text: str | None = None,
-) -> None:
+@router.message(Command("pgm"), F.forward_origin.is_(None))
+async def cmd_pgm(message: Message, _: Callable) -> None:
+    """Personal alert: needs a target and never falls back to the whole group."""
+    if not await _gm_allowed(message, _):
+        return
+
+    args = message.text.split(maxsplit=1)
+    rest = args[1].strip() if len(args) > 1 else ""
+
+    reply_target = _reply_target(message)
+    if reply_target:
+        return await _gm_user(message, _, reply_target.id, rest or None)
+    if not rest:
+        await message.reply(_("pgm_usage"))
+        return
+
+    target_id, text = await _resolve_target(rest, message.chat.id)
+    if target_id is None:
+        await message.reply(_("gm_user_not_found"))
+        return
+    return await _gm_user(message, _, target_id, text)
+
+
+async def _gm_all(message: Message, _: Callable, text: str | None = None) -> None:
     """Send GM to all enabled users in group."""
-    users = await SubscriptionRepository.get_recipients(group_id, sender_id)
-
-    if not users:
-        await msg.reply(_("gm_no_users"))
+    sender = message.from_user
+    if not await SubscriptionRepository.get_recipients(message.chat.id, sender.id):
+        await message.reply(_("gm_no_users"))
         return
 
-    await msg.reply(_("gm_sending"))
+    status = await message.reply(_("gm_sending"))
+    await _send_all_and_report(status, sender.id, sender.full_name, text, _)
 
+
+async def _send_all_and_report(
+    status: Message, sender_id: int, sender_name: str, text: str | None, _: Callable
+) -> None:
     result = await notification_service.send_gm_to_all(
-        group_id=group_id,
+        group_id=status.chat.id,
         sender_id=sender_id,
         sender_name=sender_name,
-        message=custom_text,
+        message=text,
     )
-
-    if result.fail == 0:
-        await msg.reply(_("gm_sent"))
-    else:
-        await msg.reply(_("gm_sent_stats", success=result.success, fail=result.fail))
+    await _report(status, result, sender_id, _)
 
 
-async def _send_to_user(
-    msg: Message,
-    group_id: int,
-    sender_id: int,
-    sender_name: str,
-    _: Callable,
-    *,
-    target_user_id: int,
-    custom_text: str | None = None,
-) -> None:
+async def _gm_user(message: Message, _: Callable, target_user_id: int, text: str | None) -> None:
     """Send GM to a specific user by ID."""
-    await msg.reply(_("gm_sending"))
-
+    status = await message.reply(_("gm_sending"))
     result = await notification_service.send_gm_to_user(
-        group_id=group_id,
-        sender_id=sender_id,
+        group_id=message.chat.id,
+        sender_id=message.from_user.id,
         target_user_id=target_user_id,
-        sender_name=sender_name,
-        message=custom_text,
+        sender_name=message.from_user.full_name,
+        message=text,
     )
+    await _report(status, result, message.from_user.id, _)
 
+
+async def _report(status: Message, result: GmResult, sender_id: int, _: Callable) -> None:
+    """Turn the 'sending' message into the result, with a cancel button while alerts repeat."""
     if result.refusal:
-        await msg.reply(_(result.refusal))
+        text = _(result.refusal)
     elif result.fail == 0:
-        await msg.reply(_("gm_user_sent"))
+        text = _("gm_sent")
+    elif result.success == 0:
+        text = _("gm_user_failed", error=html.escape(result.error or ""))
     else:
-        await msg.reply(_("gm_user_failed", error=result.error))
+        text = _("gm_sent_stats", success=result.success, fail=result.fail)
+
+    if result.quiet_names:
+        text += "\n" + _("gm_quiet_list", names=html.escape(", ".join(result.quiet_names)))
+
+    markup = None
+    if result.tag:
+        markup = get_cancel_repeats_keyboard(_("btn_cancel_repeats"), sender_id, result.tag)
+    await status.edit_text(text, reply_markup=markup)
 
 
-async def _resolve_and_send_to_user(
-    msg: Message,
-    group_id: int,
-    sender_id: int,
-    sender_name: str,
-    _: Callable,
-    *,
-    username: str,
-    custom_text: str | None = None,
-) -> None:
-    """Resolve username to user_id and send GM."""
-    found = await SubscriptionRepository.get_enabled_user_by_username(username, group_id)
-    if not found:
-        await msg.reply(_("gm_user_not_found"))
+@router.callback_query(F.data.startswith("gmc:"))
+async def process_cancel_repeats(callback: CallbackQuery, _: Callable) -> None:
+    """Stop Pushover retries of an alert; only its sender may do it."""
+    _prefix, sender_id, tag = callback.data.split(":")
+    if callback.from_user.id != int(sender_id):
+        await callback.answer(_("cancel_not_yours"), show_alert=True)
         return
 
-    await _send_to_user(
-        msg,
-        group_id,
-        sender_id,
-        sender_name,
-        _,
-        target_user_id=found[0],
-        custom_text=custom_text,
+    if not await pushover_client.cancel_by_tag(tag):
+        await callback.answer(_("cancel_failed"), show_alert=True)
+        return
+
+    await callback.message.edit_text(
+        f"{callback.message.html_text}\n{_('cancel_done')}", reply_markup=None
     )
+    await callback.answer()
 
 
 @router.message(Command("only_admin"))

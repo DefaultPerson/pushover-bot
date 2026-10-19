@@ -41,3 +41,9 @@ def get_groups_keyboard(groups: list[tuple[int, str, bool]]) -> InlineKeyboardMa
             ]
         )
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def get_cancel_repeats_keyboard(text: str, sender_id: int, tag: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[[InlineKeyboardButton(text=text, callback_data=f"gmc:{sender_id}:{tag}")]]
+    )

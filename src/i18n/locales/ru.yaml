@@ -139,3 +139,10 @@ push_test_title: "ТЕСТОВАЯ ТРЕВОГА"
 push_test: "Тестовая тревога! Если вы это видите, Pushover работает."
 gm_quiet_list: "🔕 Сейчас тихо, пришло без звука: {names}"
 pgm_personal_off: "Этот пользователь не принимает личные алерты."
+
+# Personal alerts and cancelling repeats
+pgm_usage: "Кого будить? Ответьте /pgm на сообщение человека или напишите /pgm @username [текст]."
+btn_cancel_repeats: "❌ Отменить повторы"
+cancel_not_yours: "Отменить повторы может только отправитель."
+cancel_failed: "Не удалось отменить повторы, попробуйте ещё раз."
+cancel_done: "❌ Повторы отменены."
