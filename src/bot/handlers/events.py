@@ -3,6 +3,7 @@ from aiogram import Router
 from aiogram.filters import JOIN_TRANSITION, KICKED, LEFT, ChatMemberUpdatedFilter
 from aiogram.types import ChatMemberUpdated
 
+from src.bot.commands import refresh_chat_menu
 from src.db.repositories import GroupRepository, SubscriptionRepository
 
 log = structlog.get_logger()
@@ -14,7 +15,9 @@ router = Router()
 async def on_bot_added(event: ChatMemberUpdated) -> None:
     """Handle bot being added to group."""
     if event.chat.type in ("group", "supergroup"):
-        await GroupRepository.upsert(event.chat.id, event.chat.title)
+        group = await GroupRepository.upsert(event.chat.id, event.chat.title)
+        # A menu pinned before the bot left lacks commands added since
+        await refresh_chat_menu(event.bot, event.chat.id, group.language, is_group=True)
         log.info("Bot added to group", group_id=event.chat.id, title=event.chat.title)
 
 

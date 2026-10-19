@@ -13,7 +13,7 @@ from src.config import settings
 log = structlog.get_logger()
 
 # Bump when the lists below change, so per-chat menus get refreshed on startup
-MENU_VERSION = "2"
+MENU_VERSION = "3"
 MENU_VERSION_KEY = "menu_version"
 
 # Private chat commands per language
@@ -123,6 +123,17 @@ async def apply_group_menu(bot: Bot, chat_id: int, lang: str) -> None:
     await bot.set_my_commands(commands, scope=BotCommandScopeChat(chat_id=chat_id))
 
 
+async def refresh_chat_menu(bot: Bot, chat_id: int, lang: str, is_group: bool) -> bool:
+    """Re-apply the menu pinned to one chat; False if the chat has none."""
+    if not await bot.get_my_commands(scope=BotCommandScopeChat(chat_id=chat_id)):
+        return False
+    if is_group:
+        await apply_group_menu(bot, chat_id, lang)
+    else:
+        await apply_user_menu(bot, chat_id, lang)
+    return True
+
+
 async def refresh_chat_menus(bot: Bot, redis: Redis, chats: list[tuple[int, str, bool]]) -> None:
     """Re-apply per-chat menus once per MENU_VERSION.
 
@@ -137,12 +148,7 @@ async def refresh_chat_menus(bot: Bot, redis: Redis, chats: list[tuple[int, str,
     for chat_id, lang, is_group in chats:
         for _attempt in range(2):
             try:
-                if await bot.get_my_commands(scope=BotCommandScopeChat(chat_id=chat_id)):
-                    if is_group:
-                        await apply_group_menu(bot, chat_id, lang)
-                    else:
-                        await apply_user_menu(bot, chat_id, lang)
-                    refreshed += 1
+                refreshed += await refresh_chat_menu(bot, chat_id, lang, is_group)
                 break
             except TelegramRetryAfter as e:
                 await asyncio.sleep(e.retry_after)

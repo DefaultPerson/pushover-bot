@@ -2,6 +2,7 @@ import html
 import json
 from collections.abc import Callable
 
+import structlog
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -23,6 +24,8 @@ from src.db.repositories import (
 )
 from src.services.notification import GmResult, notification_service
 from src.services.pushover import pushover_client
+
+log = structlog.get_logger()
 
 router = Router()
 router.message.filter(IsGroup())
@@ -141,6 +144,10 @@ def _inline_target(message: Message) -> str | None:
 async def on_inline_gm(message: Message, _: Callable, redis: Redis) -> None:
     """An alert the sender posted from '@bot' inline results (see handlers/inline.py)."""
     target = _inline_target(message)
+    # target is None when Telegram dropped the result's button
+    log.info(
+        "Inline alert", group_id=message.chat.id, sender_id=message.from_user.id, target=target
+    )
     if target is None or not await _gm_allowed(message, _):
         return
 
