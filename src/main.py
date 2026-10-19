@@ -22,8 +22,14 @@ from aiogram_broadcast.ui import BroadcastUIHandlers, BroadcastUIMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from redis.asyncio import Redis
 
-from src.bot.commands import ADMIN_COMMANDS, GROUP_COMMANDS, PRIVATE_COMMANDS
+from src.bot.commands import (
+    ADMIN_COMMANDS,
+    GROUP_COMMANDS,
+    PRIVATE_COMMANDS,
+    refresh_chat_menus,
+)
 from src.bot.handlers import setup_routers
+from src.bot.handlers.errors import on_error
 from src.bot.middlewares import (
     ArchiveMiddleware,
     FSMCancelMiddleware,
@@ -33,6 +39,7 @@ from src.bot.middlewares import (
 )
 from src.config import settings
 from src.db.database import db
+from src.db.repositories import GroupRepository, UserRepository
 from src.i18n import load_locales
 from src.services.broadcast import set_broadcast_service
 
@@ -161,8 +168,14 @@ async def main() -> None:
     # Register broadcast UI handlers
     BroadcastUIHandlers().register(dp)
 
+    # Reply on unhandled errors instead of staying silent
+    dp.errors.register(on_error)
+
     # Setup bot commands menu
     await setup_bot_commands(bot)
+    chats = [(gid, lang, True) for gid, lang in await GroupRepository.get_active_languages()]
+    chats += [(uid, lang, False) for uid, lang in await UserRepository.get_all_languages()]
+    menu_task = asyncio.create_task(refresh_chat_menus(bot, redis, chats))
 
     log.info("Bot starting...", bot_id=bot.id if hasattr(bot, "id") else "unknown")
 
@@ -172,6 +185,7 @@ async def main() -> None:
     try:
         await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     finally:
+        menu_task.cancel()
         apscheduler.shutdown()
         await db.disconnect()
         await redis.aclose()

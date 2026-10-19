@@ -122,3 +122,8 @@ class UserRepository:
             """,
             user_id,
         )
+
+    @staticmethod
+    async def get_all_languages() -> list[tuple[int, str]]:
+        rows = await db.fetch("SELECT id, language FROM users")
+        return [(row["id"], row["language"] or settings.default_language) for row in rows]

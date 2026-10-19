@@ -91,3 +91,8 @@ class GroupRepository:
             group_id,
             active,
         )
+
+    @staticmethod
+    async def get_active_languages() -> list[tuple[int, str]]:
+        rows = await db.fetch("SELECT id, language FROM groups WHERE bot_active = TRUE")
+        return [(row["id"], row["language"] or "en") for row in rows]

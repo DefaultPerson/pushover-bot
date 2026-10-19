@@ -108,19 +108,9 @@ async def process_language(callback: CallbackQuery, _: Callable) -> None:
     await UserRepository.set_language(callback.from_user.id, lang)
 
     # Update command menu for this user
-    from aiogram.types import BotCommandScopeChat
+    from src.bot.commands import apply_user_menu
 
-    from src.bot.commands import ADMIN_COMMANDS, PRIVATE_COMMANDS
-    from src.config import settings
-
-    commands = PRIVATE_COMMANDS.get(lang, PRIVATE_COMMANDS["en"])
-    if callback.from_user.id in settings.admin_ids_list:
-        commands = commands + ADMIN_COMMANDS
-
-    await callback.bot.set_my_commands(
-        commands,
-        scope=BotCommandScopeChat(chat_id=callback.from_user.id),
-    )
+    await apply_user_menu(callback.bot, callback.from_user.id, lang)
 
     # Get new locale text
     from src.i18n import get_text

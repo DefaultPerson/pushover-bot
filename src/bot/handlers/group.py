@@ -315,15 +315,9 @@ async def process_group_language(callback: CallbackQuery, _: Callable) -> None:
     await GroupRepository.set_language(callback.message.chat.id, lang)
 
     # Update command menu for this group
-    from aiogram.types import BotCommandScopeChat
+    from src.bot.commands import apply_group_menu
 
-    from src.bot.commands import GROUP_COMMANDS
-
-    commands = GROUP_COMMANDS.get(lang, GROUP_COMMANDS["en"])
-    await callback.bot.set_my_commands(
-        commands,
-        scope=BotCommandScopeChat(chat_id=callback.message.chat.id),
-    )
+    await apply_group_menu(callback.bot, callback.message.chat.id, lang)
 
     from src.i18n import get_text
 

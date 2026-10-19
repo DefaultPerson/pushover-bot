@@ -2,58 +2,33 @@
 
 # Common
 start: |
-  Pushover bot uses the <a href="https://pushover.net/">Pushover service</a> to deliver notifications from Telegram to your device.
+  Pushover bot delivers alerts from Telegram to your phone through <a href="https://pushover.net/">Pushover</a>: a siren that sounds even on silent.
 
-  You can add the bot to a group, and every member of that group will be able to send notifications to your smartphone.
-  For example, to wake you up if the BTC price reaches new highs.
+  Add the bot to a group, and its members will be able to wake you, for example when BTC hits a new high.
 
-  <b>Available commands in group chat:</b>
-  /gm — Send notification to all group members
-  /gm text — Send custom text to all
-  /gm @username — Send to a specific member by username
-  /gm @username text — With custom text
-  /gm user_id — Send to a specific member by ID
-  /gm user_id text — By ID with custom text
-  /enable — Start receiving notifications from this group.
-  /disable — Stop receiving notifications from this group.
-  /test_alarm — Send a test notification to yourself.
-  /help — Show this informative message.
-  /only_admin — Allow or disallow non-admin chat members to use the /gm command.
-
-  <b>Available commands in private chat with the bot:</b>
-  /key — Configure Pushover API key.
-  /list — List of groups with enabled notifications.
-  /test_alarm — Send a test notification to yourself.
-  /language — Change language.
-  /help — Show this informative message.
-
-  To start receiving notifications in a group, each member who wants to receive notifications must use the /enable command inside the desired group.
-
-  Before that, you need to configure your Pushover API key using the /key command in private messages with the bot.
+  <b>How to start</b>
+  1. Send /key here and set your Pushover key.
+  2. Write /enable in each group you want alerts from.
 
 help_private: |
-  <b>Available commands in private chat:</b>
-
-  /key — Configure Pushover API key
-  /list — List of groups with enabled notifications
-  /test_alarm — Send a test notification to yourself
-  /language — Change language
-  /help — Show this message
+  <b>In private chat</b>
+  /key — your Pushover key
+  /list — groups you get alerts from
+  /test_alarm — test siren to yourself
+  /quiet — quiet hours: alerts from others arrive silently
+  /block · /unblock · /blocks — stop alerts from a person
+  /personalgms on|off — accept personal alerts or not
+  /language — language
 
 help_group: |
-  <b>Available commands in group chat:</b>
-
-  /gm — Send notification to all
-  /gm text — Send custom text to all
-  /gm @username — Send to a specific member by username
-  /gm @username text — With custom text
-  /gm user_id — By ID
-  /gm user_id text — By ID with custom text
-  /enable — Start receiving notifications from this group
-  /disable — Stop receiving notifications from this group
-  /test_alarm — Send a test notification to yourself
-  /only_admin — Allow/disallow non-admins to use /gm
-  /help — Show this message
+  <b>In a group</b>
+  /gm [text] — wake everyone
+  /pgm [text] in reply to a message, or /pgm @username [text] — wake one person
+  @{bot} — the same through a list of people: name first, then text. Works even when the bot misses /gm
+  /enable · /disable — get alerts from this group or stop
+  /test_alarm — test siren to yourself
+  /id — ids of you, this chat and topic
+  <b>Admins</b>: /only_admin — /gm for admins only · /confirm_gm — ask before waking everyone · /language
 
 # Key setup
 key_prompt: |
@@ -191,3 +166,9 @@ inline_all_title: "📣 Everyone in this chat"
 inline_all_header: "🚨 Alert to everyone in this chat"
 inline_user_header: "🚨 Alert to {name}"
 inline_default_text: "Default text. Type a name, then your text"
+
+# /id
+id_user: "Your id: <code>{id}</code>"
+id_chat: "Chat id: <code>{id}</code>"
+id_topic: "Topic id: <code>{id}</code>"
+id_reply: "{name}: <code>{id}</code>"

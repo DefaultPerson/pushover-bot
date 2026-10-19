@@ -19,8 +19,12 @@ Telegram bot for emergency notifications via [Pushover](https://pushover.net/). 
 
 - **Emergency alerts** — Pushover Priority 2, bypasses quiet hours, repeats every 30s until acknowledged
 - **Group chats** — `/gm` sends a siren to all subscribed members
-- **Targeted notifications** — `/gm @username`, `/gm user_id`, or `/gm username`
-- **Custom text** — `/gm hello` or `/gm @username wake up`
+- **Targeted notifications** — `/pgm` (reply or `@username`), `/gm @username`, `/gm user_id`
+- **Custom text** — `/gm hello` or `/pgm @username wake up`
+- **Inline mode** — type `@bot name text` in a group; works even where the bot misses commands
+- **Cancel repeats** — the sender can stop the siren with a button under the result
+- **Quiet hours** — `/quiet`: alerts from others arrive silently, without repeats
+- **Blocks** — `/block` a person, or refuse all personal alerts with `/personalgms off`
 - **Message archiving** — saves all group messages to DB with media files
 - **HTML export** — searchable archive with media thumbnails
 - **Broadcast** — mass messaging for admins
@@ -53,7 +57,11 @@ curl -fsSL https://raw.githubusercontent.com/DefaultPerson/pushover-bot/main/scr
 | `/key` | Set up Pushover User Key |
 | `/list` | Groups with active notifications |
 | `/test_alarm` | Send a test siren to yourself |
+| `/quiet 23:00-07:00 Europe/Kyiv` | Daily quiet hours; also `/quiet once 23:00-07:00`, `/quiet 8h`, `/quiet off` |
+| `/block @username` / `/block user_id` | Stop alerts from a person; `/unblock`, `/blocks` |
+| `/personalgms on\|off` | Accept or refuse personal alerts |
 | `/language` | Change language |
+| `/id` | Your Telegram id |
 
 ### Group chat
 
@@ -64,8 +72,17 @@ curl -fsSL https://raw.githubusercontent.com/DefaultPerson/pushover-bot/main/scr
 | `/gm @username` | Alert a specific member |
 | `/gm @username text` | Specific member with custom text |
 | `/gm user_id` | Alert by user ID |
+| `/pgm [text]` (reply) / `/pgm @username [text]` | Personal alert; never wakes the whole group |
+| `@bot [name] [text]` | Inline: pick everyone or a person from the list |
 | `/enable` / `/disable` | Toggle notifications |
+| `/block` (reply) | Stop alerts from this person |
+| `/id` | Ids of you, the chat, the topic and the replied person |
 | `/only_admin` | Restrict `/gm` to admins only |
+| `/confirm_gm` | Ask "Wake N people?" before a group alert (admins) |
+
+### Inline mode
+
+Enable it once in BotFather: `/setinline` → choose the bot → set a placeholder such as `name and text…`. Telegram delivers messages posted through inline mode even to a non-admin bot in privacy mode.
 
 ## Configuration
 
@@ -77,6 +94,7 @@ See [`.env.example`](.env.example) for all available environment variables.
 | `PUSHOVER_APP_TOKEN` | Pushover App Token | required |
 | `DB_PASSWORD` | PostgreSQL password | required |
 | `ADMIN_IDS` | Admin Telegram IDs (comma-separated) | |
+| `DEFAULT_TIMEZONE` | Timezone for `/quiet` when the user gives none | `UTC` |
 | `ARCHIVE_ENABLED` | Archive group messages | `false` |
 
 ## Development

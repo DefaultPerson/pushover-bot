@@ -19,20 +19,38 @@ router = Router()
 log = structlog.get_logger()
 
 
+async def _help_group(message: Message, _: Callable) -> str:
+    me = await message.bot.me()
+    return _("help_group", bot=me.username)
+
+
 @router.message(CommandStart(), IsPrivate())
 async def cmd_start(message: Message, _: Callable) -> None:
     log.info("cmd_start", user_id=message.from_user.id)
-    await message.answer(_("start"))
+    await message.answer(f"{_('start')}\n\n{_('help_private')}\n\n{await _help_group(message, _)}")
 
 
 @router.message(Command("help"), IsPrivate())
 async def cmd_help_private(message: Message, _: Callable) -> None:
-    await message.answer(_("start"))
+    await message.answer(f"{_('help_private')}\n\n{await _help_group(message, _)}")
 
 
 @router.message(Command("help"), IsGroup())
 async def cmd_help_group(message: Message, _: Callable) -> None:
-    await message.reply(_("start"))
+    await message.reply(await _help_group(message, _))
+
+
+@router.message(Command("id"))
+async def cmd_id(message: Message, _: Callable) -> None:
+    lines = [_("id_user", id=message.from_user.id)]
+    if message.chat.type != "private":
+        lines.append(_("id_chat", id=message.chat.id))
+    if message.is_topic_message:
+        lines.append(_("id_topic", id=message.message_thread_id))
+    target = reply_target(message)
+    if target:
+        lines.append(_("id_reply", name=html.escape(target.full_name), id=target.id))
+    await message.reply("\n".join(lines))
 
 
 @router.message(Command("test_alarm"))
