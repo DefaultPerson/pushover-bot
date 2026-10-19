@@ -4,10 +4,10 @@ from collections.abc import Callable
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
-from aiogram.types import User as TgUser
 
 from src.bot.filters import IsGroup
 from src.bot.keyboards import get_cancel_repeats_keyboard, get_language_keyboard
+from src.bot.utils import reply_target
 from src.db.models import User
 from src.db.repositories import GroupRepository, SubscriptionRepository
 from src.services.notification import GmResult, notification_service
@@ -48,14 +48,6 @@ async def _gm_allowed(message: Message, _: Callable) -> bool:
         await message.reply(_("gm_admin_only"))
         return False
     return True
-
-
-def _reply_target(message: Message) -> TgUser | None:
-    """Author of the replied message, ignoring bots and the forum topic root."""
-    reply = message.reply_to_message
-    if not reply or not reply.from_user or reply.from_user.is_bot or reply.forum_topic_created:
-        return None
-    return reply.from_user
 
 
 async def _resolve_target(rest: str, group_id: int) -> tuple[int | None, str | None]:
@@ -105,9 +97,9 @@ async def cmd_pgm(message: Message, _: Callable) -> None:
     args = message.text.split(maxsplit=1)
     rest = args[1].strip() if len(args) > 1 else ""
 
-    reply_target = _reply_target(message)
-    if reply_target:
-        return await _gm_user(message, _, reply_target.id, rest or None)
+    target = reply_target(message)
+    if target:
+        return await _gm_user(message, _, target.id, rest or None)
     if not rest:
         await message.reply(_("pgm_usage"))
         return

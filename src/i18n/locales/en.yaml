@@ -146,3 +146,31 @@ btn_cancel_repeats: "❌ Cancel repeats"
 cancel_not_yours: "Only the sender can cancel repeats."
 cancel_failed: "Couldn't cancel repeats, try again."
 cancel_done: "❌ Repeats cancelled."
+
+# Quiet hours, personal alerts, blocks
+quiet_usage: |
+  <b>Quiet hours</b>: alerts from others arrive without sound and without repeats.
+  /quiet 23:00-07:00 Europe/Kyiv — every day
+  /quiet once 23:00-07:00 — only the next such night
+  /quiet 8h — for 8 hours from now (also 30m, 1h30m)
+  /quiet off — turn off
+  Without a timezone, your last one is used, otherwise {tz}.
+quiet_bad_tz: "Unknown timezone. Use a name like Europe/Kyiv or UTC."
+quiet_off: "🔔 Quiet hours are off."
+quiet_daily_set: "🔕 Every day {start}–{end} ({tz}) alerts from others will be silent."
+quiet_period_set: "🔕 Silent from {start} to {end}."
+quiet_status_daily: "🔕 Every day: {start}–{end} ({tz})"
+quiet_status_period: "🔕 Once: from {start} to {end}"
+quiet_status_none: "🔔 Quiet hours are off."
+personalgms_on: "✅ Personal alerts are on."
+personalgms_off: "🚫 Personal alerts are off: nobody can wake you personally. Group alerts still arrive."
+personalgms_status_on: "Personal alerts are on. /personalgms off — stop them."
+personalgms_status_off: "Personal alerts are off. /personalgms on — allow them again."
+block_usage: "Reply /block to someone's message, or write /block @username or /block 123456789 (the id from /id)."
+block_unknown_user: "I don't know this user. Use their numeric id: they can get it with /id."
+block_self: "You can't block yourself."
+block_done: "🚫 {name} is blocked: their alerts won't reach you. /unblock to undo."
+unblock_done: "✅ {name} is unblocked."
+unblock_missing: "{name} wasn't blocked."
+blocks_header: "<b>You blocked:</b>"
+blocks_empty: "You haven't blocked anyone."

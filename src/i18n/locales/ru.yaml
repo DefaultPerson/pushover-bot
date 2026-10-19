@@ -146,3 +146,31 @@ btn_cancel_repeats: "❌ Отменить повторы"
 cancel_not_yours: "Отменить повторы может только отправитель."
 cancel_failed: "Не удалось отменить повторы, попробуйте ещё раз."
 cancel_done: "❌ Повторы отменены."
+
+# Quiet hours, personal alerts, blocks
+quiet_usage: |
+  <b>Тихие часы</b>: алерты от других приходят без звука и без повторов.
+  /quiet 23:00-07:00 Europe/Kyiv — каждый день
+  /quiet once 23:00-07:00 — только ближайшую такую ночь
+  /quiet 8h — на 8 часов с этой минуты (можно 30m, 1h30m)
+  /quiet off — выключить
+  Без часового пояса берётся последний указанный, иначе {tz}.
+quiet_bad_tz: "Неизвестный часовой пояс. Укажите название вроде Europe/Kyiv или UTC."
+quiet_off: "🔔 Тихие часы выключены."
+quiet_daily_set: "🔕 Каждый день {start}–{end} ({tz}) алерты от других будут приходить без звука."
+quiet_period_set: "🔕 Без звука с {start} до {end}."
+quiet_status_daily: "🔕 Каждый день: {start}–{end} ({tz})"
+quiet_status_period: "🔕 Разово: с {start} до {end}"
+quiet_status_none: "🔔 Тихие часы не заданы."
+personalgms_on: "✅ Личные алерты включены."
+personalgms_off: "🚫 Личные алерты выключены: лично вас никто не разбудит. Групповые алерты приходят как обычно."
+personalgms_status_on: "Личные алерты включены. /personalgms off — выключить."
+personalgms_status_off: "Личные алерты выключены. /personalgms on — включить снова."
+block_usage: "Ответьте /block на сообщение человека или напишите /block @username или /block 123456789 (id из /id)."
+block_unknown_user: "Не знаю такого пользователя. Укажите числовой id: человек может узнать его через /id."
+block_self: "Себя заблокировать нельзя."
+block_done: "🚫 {name} заблокирован: его алерты до вас не дойдут. /unblock — снять."
+unblock_done: "✅ {name} разблокирован."
+unblock_missing: "{name} не был заблокирован."
+blocks_header: "<b>Вы заблокировали:</b>"
+blocks_empty: "Вы никого не блокировали."

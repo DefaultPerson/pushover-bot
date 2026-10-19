@@ -146,3 +146,31 @@ btn_cancel_repeats: "❌ Скасувати повтори"
 cancel_not_yours: "Скасувати повтори може лише відправник."
 cancel_failed: "Не вдалося скасувати повтори, спробуйте ще раз."
 cancel_done: "❌ Повтори скасовано."
+
+# Quiet hours, personal alerts, blocks
+quiet_usage: |
+  <b>Тихі години</b>: алерти від інших приходять без звуку і без повторів.
+  /quiet 23:00-07:00 Europe/Kyiv — щодня
+  /quiet once 23:00-07:00 — лише найближчу таку ніч
+  /quiet 8h — на 8 годин від цієї хвилини (можна 30m, 1h30m)
+  /quiet off — вимкнути
+  Без часового поясу береться останній вказаний, інакше {tz}.
+quiet_bad_tz: "Невідомий часовий пояс. Вкажіть назву на кшталт Europe/Kyiv або UTC."
+quiet_off: "🔔 Тихі години вимкнено."
+quiet_daily_set: "🔕 Щодня {start}–{end} ({tz}) алерти від інших приходитимуть без звуку."
+quiet_period_set: "🔕 Без звуку з {start} до {end}."
+quiet_status_daily: "🔕 Щодня: {start}–{end} ({tz})"
+quiet_status_period: "🔕 Разово: з {start} до {end}"
+quiet_status_none: "🔔 Тихі години не задано."
+personalgms_on: "✅ Особисті алерти увімкнено."
+personalgms_off: "🚫 Особисті алерти вимкнено: особисто вас ніхто не розбудить. Групові алерти приходять як зазвичай."
+personalgms_status_on: "Особисті алерти увімкнено. /personalgms off — вимкнути."
+personalgms_status_off: "Особисті алерти вимкнено. /personalgms on — увімкнути знову."
+block_usage: "Дайте відповідь /block на повідомлення людини або напишіть /block @username чи /block 123456789 (id з /id)."
+block_unknown_user: "Не знаю такого користувача. Вкажіть числовий id: людина може дізнатися його через /id."
+block_self: "Себе заблокувати не можна."
+block_done: "🚫 {name} заблоковано: його алерти до вас не дійдуть. /unblock — зняти."
+unblock_done: "✅ {name} розблоковано."
+unblock_missing: "{name} не був заблокований."
+blocks_header: "<b>Ви заблокували:</b>"
+blocks_empty: "Ви нікого не блокували."
