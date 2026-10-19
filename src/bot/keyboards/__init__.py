@@ -3,6 +3,7 @@ from .inline import (
     get_cancel_repeats_keyboard,
     get_confirm_gm_keyboard,
     get_groups_keyboard,
+    get_inline_gm_keyboard,
     get_language_keyboard,
 )
 
@@ -11,5 +12,6 @@ __all__ = [
     "get_cancel_repeats_keyboard",
     "get_confirm_gm_keyboard",
     "get_groups_keyboard",
+    "get_inline_gm_keyboard",
     "get_language_keyboard",
 ]

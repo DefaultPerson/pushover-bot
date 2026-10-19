@@ -184,3 +184,10 @@ btn_confirm_no: "✖️ Cancel"
 confirm_cancelled: "✖️ Alert cancelled."
 confirm_expired: "⌛ The request expired, send /gm again."
 confirm_not_yours: "Only the sender can answer this."
+
+# Inline mode
+inline_only_groups: "Works in groups: type @bot there"
+inline_all_title: "📣 Everyone in this chat"
+inline_all_header: "🚨 Alert to everyone in this chat"
+inline_user_header: "🚨 Alert to {name}"
+inline_default_text: "Default text. Type a name, then your text"

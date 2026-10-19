@@ -152,6 +152,8 @@ async def main() -> None:
     dp.message.middleware(ThrottlingMiddleware())
     dp.callback_query.middleware(I18nMiddleware())
     dp.callback_query.middleware(UserMiddleware())
+    dp.inline_query.middleware(I18nMiddleware())
+    dp.inline_query.middleware(UserMiddleware())
 
     # Setup routers
     dp.include_router(setup_routers())

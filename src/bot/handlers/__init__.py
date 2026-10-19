@@ -4,6 +4,7 @@ from .admin import router as admin_router
 from .common import router as common_router
 from .events import router as events_router
 from .group import router as group_router
+from .inline import router as inline_router
 from .private import router as private_router
 
 
@@ -14,6 +15,7 @@ def setup_routers() -> Router:
     main_router.include_router(admin_router)  # Admin commands first
     main_router.include_router(private_router)
     main_router.include_router(group_router)
+    main_router.include_router(inline_router)
     main_router.include_router(common_router)
     return main_router
 

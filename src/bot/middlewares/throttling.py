@@ -9,7 +9,7 @@ from src.db.repositories import NotificationLogRepository
 
 
 class ThrottlingMiddleware(BaseMiddleware):
-    """Rate limiting for /gm, /pgm and /test_alarm commands."""
+    """Rate limiting for /gm, /pgm, inline alerts and /test_alarm."""
 
     async def __call__(
         self,
@@ -23,8 +23,10 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         text = event.text.lower()
 
-        # Check /gm and /pgm rate limit in groups
-        if text.startswith(("/gm", "/pgm")) and event.chat.type in ("group", "supergroup"):
+        # Check /gm, /pgm and inline alert rate limit in groups
+        via_this_bot = event.via_bot is not None and event.via_bot.id == event.bot.id
+        is_gm = text.startswith(("/gm", "/pgm")) or via_this_bot
+        if is_gm and event.chat.type in ("group", "supergroup"):
             allowed = await NotificationLogRepository.check_gm_rate_limit(
                 group_id=event.chat.id,
                 window_seconds=settings.gm_rate_window,

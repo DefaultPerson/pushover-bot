@@ -184,3 +184,10 @@ btn_confirm_no: "✖️ Скасувати"
 confirm_cancelled: "✖️ Алерт скасовано."
 confirm_expired: "⌛ Запит застарів, надішліть /gm ще раз."
 confirm_not_yours: "Відповісти може лише відправник."
+
+# Inline mode
+inline_only_groups: "Працює в групах: наберіть там @бота"
+inline_all_title: "📣 Усім у цьому чаті"
+inline_all_header: "🚨 Алерт усім у цьому чаті"
+inline_user_header: "🚨 Алерт для {name}"
+inline_default_text: "Текст за замовчуванням. Почніть з імені, далі текст"

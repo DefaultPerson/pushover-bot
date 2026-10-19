@@ -58,3 +58,10 @@ def get_confirm_gm_keyboard(yes: str, no: str, sender_id: int) -> InlineKeyboard
             ]
         ]
     )
+
+
+def get_inline_gm_keyboard(target: str) -> InlineKeyboardMarkup:
+    """Button on a message posted from inline results; its data tells the bot whom to wake."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[[InlineKeyboardButton(text="🚨", callback_data=f"ig:{target}")]]
+    )

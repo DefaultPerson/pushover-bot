@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from redis.asyncio import Redis
 
-from src.bot.filters import IsGroup
+from src.bot.filters import IsGroup, ViaThisBot
 from src.bot.keyboards import (
     get_cancel_repeats_keyboard,
     get_confirm_gm_keyboard,
@@ -118,6 +118,33 @@ async def cmd_pgm(message: Message, _: Callable) -> None:
         await message.reply(_("gm_user_not_found"))
         return
     return await _gm_user(message, _, target_id, text)
+
+
+def _inline_target(message: Message) -> str | None:
+    """'all' or a user id, from the button the inline result was posted with."""
+    markup = message.reply_markup
+    if not markup or not markup.inline_keyboard or not markup.inline_keyboard[0]:
+        return None
+    data = markup.inline_keyboard[0][0].callback_data or ""
+    target = data.removeprefix("ig:")
+    if data.startswith("ig:") and (target == "all" or target.isdigit()):
+        return target
+    return None
+
+
+@router.message(ViaThisBot(), F.forward_origin.is_(None))
+async def on_inline_gm(message: Message, _: Callable, redis: Redis) -> None:
+    """An alert the sender posted from '@bot' inline results (see handlers/inline.py)."""
+    target = _inline_target(message)
+    if target is None or not await _gm_allowed(message, _):
+        return
+
+    # First line is the header the bot generated, the rest is the sender's text
+    lines = (message.text or "").split("\n", 1)
+    text = lines[1].strip() if len(lines) > 1 else ""
+    if target == "all":
+        return await _gm_all(message, _, redis, text or None)
+    return await _gm_user(message, _, int(target), text or None)
 
 
 def _confirm_key(message: Message) -> str:
