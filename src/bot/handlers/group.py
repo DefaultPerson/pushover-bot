@@ -13,9 +13,14 @@ from src.bot.keyboards import (
     get_confirm_gm_keyboard,
     get_language_keyboard,
 )
-from src.bot.utils import reply_target
+from src.bot.utils import button_is_real, reply_target
+from src.config import settings
 from src.db.models import User
-from src.db.repositories import GroupRepository, SubscriptionRepository
+from src.db.repositories import (
+    GroupRepository,
+    NotificationLogRepository,
+    SubscriptionRepository,
+)
 from src.services.notification import GmResult, notification_service
 from src.services.pushover import pushover_client
 
@@ -223,7 +228,7 @@ async def _report(status: Message, result: GmResult, sender_id: int, _: Callable
 async def process_gm_confirm(callback: CallbackQuery, _: Callable, redis: Redis) -> None:
     """Answer to 'Wake N people?'; only the sender may answer."""
     action, sender_id = callback.data.split(":")
-    if callback.from_user.id != int(sender_id):
+    if not button_is_real(callback) or callback.from_user.id != int(sender_id):
         await callback.answer(_("confirm_not_yours"), show_alert=True)
         return
 
@@ -241,6 +246,16 @@ async def process_gm_confirm(callback: CallbackQuery, _: Callable, redis: Redis)
         await callback.message.edit_text(_("confirm_expired"))
         return
 
+    # Several prompts may wait at once; the limit counts only sent alerts
+    allowed = await NotificationLogRepository.check_gm_rate_limit(
+        group_id=callback.message.chat.id,
+        window_seconds=settings.gm_rate_window,
+        max_calls=settings.gm_rate_limit,
+    )
+    if not allowed:
+        await callback.message.edit_text(_("rate_limit_gm"))
+        return
+
     data = json.loads(pending)
     await callback.message.edit_text(_("gm_sending"))
     await _send_all_and_report(callback.message, int(sender_id), data["name"], data["text"], _)
@@ -250,7 +265,7 @@ async def process_gm_confirm(callback: CallbackQuery, _: Callable, redis: Redis)
 async def process_cancel_repeats(callback: CallbackQuery, _: Callable) -> None:
     """Stop Pushover retries of an alert; only its sender may do it."""
     _prefix, sender_id, tag = callback.data.split(":")
-    if callback.from_user.id != int(sender_id):
+    if not button_is_real(callback) or callback.from_user.id != int(sender_id):
         await callback.answer(_("cancel_not_yours"), show_alert=True)
         return
 

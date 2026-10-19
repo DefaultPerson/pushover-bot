@@ -9,7 +9,8 @@ from src.config import settings
 from src.db.models import User
 
 _WINDOW_RE = re.compile(r"^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$")
-_DURATION_RE = re.compile(r"^(?:(\d+)h)?(?:(\d+)m)?$")
+# Bounded digits keep timedelta() from overflowing before the MAX_DURATION check
+_DURATION_RE = re.compile(r"^(?:(\d{1,3})h)?(?:(\d{1,5})m)?$")
 MAX_DURATION = timedelta(days=7)
 
 
@@ -54,7 +55,8 @@ def _current_or_next_window(
         window_start = datetime.combine(day, start, zone)
         end_day = day if end > start else day + timedelta(days=1)
         window_end = datetime.combine(end_day, end, zone)
-        if window_end > local_now:
+        # Compare instants: same-zone comparison ignores fold and breaks on DST rollback
+        if window_end.timestamp() > now.timestamp():
             return window_start, window_end
     raise AssertionError("unreachable: tomorrow's window always ends in the future")
 
