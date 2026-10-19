@@ -174,3 +174,13 @@ unblock_done: "✅ {name} is unblocked."
 unblock_missing: "{name} wasn't blocked."
 blocks_header: "<b>You blocked:</b>"
 blocks_empty: "You haven't blocked anyone."
+
+# Group alert confirmation
+confirm_gm_enabled: "Now the bot asks for confirmation before a group alert."
+confirm_gm_disabled: "Group alerts go out without confirmation again."
+confirm_prompt: "Wake {count} people?"
+btn_confirm_yes: "✅ Wake"
+btn_confirm_no: "✖️ Cancel"
+confirm_cancelled: "✖️ Alert cancelled."
+confirm_expired: "⌛ The request expired, send /gm again."
+confirm_not_yours: "Only the sender can answer this."

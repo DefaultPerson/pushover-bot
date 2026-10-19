@@ -1,12 +1,18 @@
 import html
+import json
 from collections.abc import Callable
 
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
+from redis.asyncio import Redis
 
 from src.bot.filters import IsGroup
-from src.bot.keyboards import get_cancel_repeats_keyboard, get_language_keyboard
+from src.bot.keyboards import (
+    get_cancel_repeats_keyboard,
+    get_confirm_gm_keyboard,
+    get_language_keyboard,
+)
 from src.bot.utils import reply_target
 from src.db.models import User
 from src.db.repositories import GroupRepository, SubscriptionRepository
@@ -15,6 +21,9 @@ from src.services.pushover import pushover_client
 
 router = Router()
 router.message.filter(IsGroup())
+
+# Seconds a /confirm_gm request waits for the sender's answer
+CONFIRM_TTL = 120
 
 
 async def is_admin(message: Message) -> bool:
@@ -67,14 +76,14 @@ async def _resolve_target(rest: str, group_id: int) -> tuple[int | None, str | N
 
 # Forwarded commands come from someone else's chat history, never act on them
 @router.message(Command("gm"), F.forward_origin.is_(None))
-async def cmd_gm(message: Message, _: Callable) -> None:
+async def cmd_gm(message: Message, _: Callable, redis: Redis) -> None:
     if not await _gm_allowed(message, _):
         return
 
     # Parse arguments: /gm [target] [custom_text]
     args = message.text.split(maxsplit=1)
     if len(args) <= 1:
-        return await _gm_all(message, _)
+        return await _gm_all(message, _, redis)
 
     rest = args[1].strip()
     target_id, text = await _resolve_target(rest, message.chat.id)
@@ -85,7 +94,7 @@ async def cmd_gm(message: Message, _: Callable) -> None:
         return
 
     # The first word names nobody → the entire rest is custom text for all
-    return await _gm_all(message, _, rest)
+    return await _gm_all(message, _, redis, rest)
 
 
 @router.message(Command("pgm"), F.forward_origin.is_(None))
@@ -111,11 +120,27 @@ async def cmd_pgm(message: Message, _: Callable) -> None:
     return await _gm_user(message, _, target_id, text)
 
 
-async def _gm_all(message: Message, _: Callable, text: str | None = None) -> None:
-    """Send GM to all enabled users in group."""
+def _confirm_key(message: Message) -> str:
+    return f"gm_confirm:{message.chat.id}:{message.message_id}"
+
+
+async def _gm_all(message: Message, _: Callable, redis: Redis, text: str | None = None) -> None:
+    """Send GM to all enabled users in group, after confirmation if the group wants it."""
     sender = message.from_user
-    if not await SubscriptionRepository.get_recipients(message.chat.id, sender.id):
+    recipients = await SubscriptionRepository.get_recipients(message.chat.id, sender.id)
+    if not recipients:
         await message.reply(_("gm_no_users"))
+        return
+
+    if await GroupRepository.is_confirm_gm(message.chat.id):
+        prompt = await message.reply(
+            _("confirm_prompt", count=len(recipients)),
+            reply_markup=get_confirm_gm_keyboard(
+                _("btn_confirm_yes"), _("btn_confirm_no"), sender.id
+            ),
+        )
+        pending = json.dumps({"name": sender.full_name, "text": text})
+        await redis.set(_confirm_key(prompt), pending, ex=CONFIRM_TTL)
         return
 
     status = await message.reply(_("gm_sending"))
@@ -167,6 +192,33 @@ async def _report(status: Message, result: GmResult, sender_id: int, _: Callable
     await status.edit_text(text, reply_markup=markup)
 
 
+@router.callback_query(F.data.startswith(("gmy:", "gmn:")))
+async def process_gm_confirm(callback: CallbackQuery, _: Callable, redis: Redis) -> None:
+    """Answer to 'Wake N people?'; only the sender may answer."""
+    action, sender_id = callback.data.split(":")
+    if callback.from_user.id != int(sender_id):
+        await callback.answer(_("confirm_not_yours"), show_alert=True)
+        return
+
+    # Whoever deletes the key owns the request, so a double tap can't send twice
+    key = _confirm_key(callback.message)
+    pending = await redis.get(key)
+    if pending is not None and not await redis.delete(key):
+        pending = None
+    await callback.answer()
+
+    if action == "gmn":
+        await callback.message.edit_text(_("confirm_cancelled"))
+        return
+    if pending is None:
+        await callback.message.edit_text(_("confirm_expired"))
+        return
+
+    data = json.loads(pending)
+    await callback.message.edit_text(_("gm_sending"))
+    await _send_all_and_report(callback.message, int(sender_id), data["name"], data["text"], _)
+
+
 @router.callback_query(F.data.startswith("gmc:"))
 async def process_cancel_repeats(callback: CallbackQuery, _: Callable) -> None:
     """Stop Pushover retries of an alert; only its sender may do it."""
@@ -197,6 +249,16 @@ async def cmd_only_admin(message: Message, _: Callable) -> None:
         await message.reply(_("only_admin_enabled"))
     else:
         await message.reply(_("only_admin_disabled"))
+
+
+@router.message(Command("confirm_gm"))
+async def cmd_confirm_gm(message: Message, _: Callable) -> None:
+    if not await is_admin(message):
+        await message.reply(_("only_admin_permission"))
+        return
+
+    new_value = await GroupRepository.toggle_confirm_gm(message.chat.id)
+    await message.reply(_("confirm_gm_enabled" if new_value else "confirm_gm_disabled"))
 
 
 @router.message(Command("language"))

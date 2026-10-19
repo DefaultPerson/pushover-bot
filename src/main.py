@@ -129,6 +129,7 @@ async def main() -> None:
 
     # Initialize dispatcher with Redis FSM storage
     dp = Dispatcher(storage=fsm_storage)
+    dp["redis"] = redis  # handlers that keep short-lived state take `redis: Redis`
 
     # Setup middlewares (order matters: broadcast first to track users, then fsm_cancel, i18n, user, throttling)
     broadcast_middleware = BroadcastMiddleware(broadcast_storage)

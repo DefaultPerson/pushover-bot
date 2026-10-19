@@ -174,3 +174,13 @@ unblock_done: "✅ {name} розблоковано."
 unblock_missing: "{name} не був заблокований."
 blocks_header: "<b>Ви заблокували:</b>"
 blocks_empty: "Ви нікого не блокували."
+
+# Group alert confirmation
+confirm_gm_enabled: "Тепер перед груповим алертом бот питатиме підтвердження."
+confirm_gm_disabled: "Групові алерти знову йдуть без підтвердження."
+confirm_prompt: "Розбудити {count} осіб?"
+btn_confirm_yes: "✅ Розбудити"
+btn_confirm_no: "✖️ Скасувати"
+confirm_cancelled: "✖️ Алерт скасовано."
+confirm_expired: "⌛ Запит застарів, надішліть /gm ще раз."
+confirm_not_yours: "Відповісти може лише відправник."

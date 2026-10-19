@@ -47,3 +47,14 @@ def get_cancel_repeats_keyboard(text: str, sender_id: int, tag: str) -> InlineKe
     return InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(text=text, callback_data=f"gmc:{sender_id}:{tag}")]]
     )
+
+
+def get_confirm_gm_keyboard(yes: str, no: str, sender_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text=yes, callback_data=f"gmy:{sender_id}"),
+                InlineKeyboardButton(text=no, callback_data=f"gmn:{sender_id}"),
+            ]
+        ]
+    )
